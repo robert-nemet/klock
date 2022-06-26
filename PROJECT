@@ -1,0 +1,6 @@
+domain: rnemet.dev
+layout:
+- go.kubebuilder.io/v3
+projectName: klock
+repo: klock
+version: "3"
