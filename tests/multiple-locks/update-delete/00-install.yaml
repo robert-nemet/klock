@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netherland
+  labels:
+    dark: knight
+spec:
+  containers:
+  - name: southgate
+    image: nginx
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: burningsun
+  labels:
+    dragon: red
+spec:
+  containers:
+  - name: cave
+    image: nginx
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ravenloft
+  labels:
+    were: wolf
+spec:
+  containers:
+  - name: castle
+    image: nginx
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: locksmith
+spec:
+  operations:
+    - DELETE
+  matcher:
+    dragon: black
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: knight
+spec:
+  operations:
+    - UPDATE
+  matcher:
+    slayer: dragon

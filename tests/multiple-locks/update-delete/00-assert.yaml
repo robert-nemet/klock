@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netherland
+  labels:
+    dark: knight
+status:
+  phase: Running
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: burningsun
+  labels:
+    dragon: red
+status:
+  phase: Running
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ravenloft
+  labels:
+    were: wolf
+status:
+  phase: Running
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: locksmith
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: knight
+      
+  

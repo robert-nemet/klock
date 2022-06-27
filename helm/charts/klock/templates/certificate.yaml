@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: klock-serving-cert
+  namespace: klock-system
+spec:
+  dnsNames:
+  - klock-webhook-service.klock-system.svc
+  - klock-webhook-service.klock-system.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: klock-selfsigned-issuer
+  secretName: webhook-server-cert

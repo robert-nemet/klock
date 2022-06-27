@@ -1,0 +1,10 @@
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: lock-sample
+spec:
+  operations:
+    - UPDATE
+    - DELETE
+  matcher:
+    test: test

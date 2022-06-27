@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: klock-leader-election-rolebinding
+  namespace: klock-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: klock-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: klock-controller-manager
+  namespace: klock-system

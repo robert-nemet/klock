@@ -1,30 +1,94 @@
 # klock
-// TODO(user): Add simple overview of use/purpose
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
 
-## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
-**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+Locking Kubernetes resources to prevent update or/and delete operation. Locking is done by defining `Lock` CRD. The `Lock`
+define what operations should be watched and for what operation. Matching resources are done trough labels.
 
-### Running on the cluster
-1. Install Instances of Custom Resources:
+Example:
 
-```sh
-kubectl apply -f config/samples/
+```yaml
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: lock-sample
+  namespace: test
+spec:
+  operations:
+    - UPDATE
+    - DELETE
+  matcher:
+    test: test
 ```
 
-2. Build and push your image to the location specified by `IMG`:
-	
-```sh
-make docker-build docker-push IMG=<some-registry>/klock:tag
-```
-	
-3. Deploy the controller to the cluster with the image specified by `IMG`:
+### Field spec
+
+Field `spec` contains `Lock` specification. It has two sub resources:
+
+* `operations` is a list containing operations to watch for
+* `matcher` is a set of labels to match when looking for locked resources
+
+### How it works
+
+Based on `ValidatingWebhookConfiguration` when ever one of operations is invoked:
+
+* check if in target `namespace` exists any `Lock`
+* for every found `Lock` which contains target operation:
+  * try to find matching `Lock` and target object
+
+## Development
+
+### Testing
+
+Tests are located in folder `./tests/`:
 
 ```sh
-make deploy IMG=<some-registry>/klock:tag
+make ktest
+```
+
+### Install tools
+
+Tests are run by [kind](https://kind.sigs.k8s.io/) and [KUTTL](https://kuttl.dev/).
+
+### Prepare local environment
+
+Start `kind` cluster:
+
+```sh
+make make-cluster
+```
+
+Install `cert-manager`:
+
+```sh
+make cert-manager
+```
+
+### Build image locally
+
+```sh
+make make docker-build IMG=IMG=<some-registry>/klock:tag
+```
+
+Load image into local cluster: `kind load docker-image IMG=<some-registry>/klock:tag`
+
+### Install
+
+For development:
+
+* Kustomize: `make deploy IMG=IMG=<some-registry>/klock:tag`
+* Helm: `helm install klock klock` from `helm` folder.
+
+To your cluster:
+
+```sh
+kubectl apply -f install/klock-0.0.1.yaml
+```
+
+### Run tests
+
+```shell
+make ktest
 ```
 
 ### Uninstall CRDs
@@ -41,40 +105,11 @@ UnDeploy the controller to the cluster:
 make undeploy
 ```
 
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
-
 ### How it works
 This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
 
 It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) 
 which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster 
-
-### Test It Out
-1. Install the CRDs into the cluster:
-
-```sh
-make install
-```
-
-2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
-
-```sh
-make run
-```
-
-**NOTE:** You can also run this in one step by running: `make install run`
-
-### Modifying the API definitions
-If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
-
-```sh
-make manifests
-```
-
-**NOTE:** Run `make --help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
 ## License
 

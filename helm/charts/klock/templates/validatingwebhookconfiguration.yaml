@@ -1,0 +1,30 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: klock-system/klock-serving-cert
+  name: klock-validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: klock-webhook-service
+      namespace: klock-system
+      path: /validate-all
+  failurePolicy: Fail
+  name: klocks.rnemet.dev
+  rules:
+  - apiGroups:
+    - '*'
+    apiVersions:
+    - '*'
+    operations:
+    - DELETE
+    - UPDATE
+    resources:
+    - pods
+    - deployments
+    - secrets
+    - configmaps
+  sideEffects: None

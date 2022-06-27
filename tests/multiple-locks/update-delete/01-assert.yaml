@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: burningsun
+  labels:
+    dragon: black
+status:
+  phase: Running
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: locksmith
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: knight
+      
+  

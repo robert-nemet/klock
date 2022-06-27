@@ -1,6 +1,30 @@
 domain: rnemet.dev
 layout:
 - go.kubebuilder.io/v3
+multigroup: true
 projectName: klock
 repo: klock
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: rnemet.dev
+  group: klock
+  kind: Lock
+  path: klock/apis/klock/v1
+  version: v1
+- group: core
+  kind: Pod
+  path: k8s.io/api/core/v1
+  version: v1
+  webhooks:
+    validation: true
+    webhookVersion: v1
+- group: apps
+  kind: Deployment
+  path: k8s.io/api/apps/v1
+  version: v1
+  webhooks:
+    validation: true
+    webhookVersion: v1
 version: "3"
