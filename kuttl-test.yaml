@@ -3,3 +3,4 @@ kind: TestSuite
 testDirs:
 - ./tests/e2e/
 - ./tests/multiple-locks/
+- ./tests/deadlock/

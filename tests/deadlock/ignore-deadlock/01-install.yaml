@@ -1,0 +1,25 @@
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: red
+  labels:
+    aura: red
+spec:
+  operations:
+    - UPDATE
+    - DELETE
+  matcher:
+    aura: blue
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: blue
+  labels:
+    aura: blue
+spec:
+  operations:
+    - UPDATE
+    - DELETE
+  matcher:
+    aura: red

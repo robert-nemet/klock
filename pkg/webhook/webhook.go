@@ -49,22 +49,26 @@ func (v *validator) Handle(ctx context.Context, req admission.Request) admission
 
 	log.Info("enter webhook")
 
+	var target unstructured.Unstructured
+
+	err := json.Unmarshal(req.OldObject.Raw, &target)
+	if err != nil {
+		log.Error(err, "can not unmarchal OldObject => allow")
+		return admission.Allowed("can not unmarchal OldObject => allow")
+	}
+
+	if target.GetKind() == "Lock" {
+		return admission.Allowed("kind Lock can not be locked")
+	}
+
+	labels := target.GetLabels()
+
 	lockList, err := v.getLocks(ctx, req)
 
 	if err != nil {
 		log.Error(err, "error while getting LockList")
 		return admission.Allowed("")
 	}
-
-	var target unstructured.Unstructured
-
-	err = json.Unmarshal(req.OldObject.Raw, &target)
-	if err != nil {
-		log.Error(err, "can not unmarchal OldObject => allow")
-		return admission.Allowed("can not unmarchal OldObject => allow")
-	}
-
-	labels := target.GetLabels()
 
 	for _, lock := range lockList.Items {
 		if v.matchOperation(string(req.Operation), lock.Spec.Operations) {

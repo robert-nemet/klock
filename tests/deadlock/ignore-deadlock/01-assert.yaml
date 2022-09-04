@@ -1,0 +1,13 @@
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: red
+  labels:
+    aura: red
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: blue
+  labels:
+    aura: blue
