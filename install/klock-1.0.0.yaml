@@ -275,7 +275,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: rnemet/klock:v0.0.1
+        image: rnemet/klock:1.0.0
         livenessProbe:
           httpGet:
             path: /healthz
