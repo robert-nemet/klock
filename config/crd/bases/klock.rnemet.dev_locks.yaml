@@ -35,6 +35,14 @@ spec:
           spec:
             description: LockSpec defines the desired state of Lock
             properties:
+              exclusive:
+                description: Exclusive defines for whom Lock is ignored
+                properties:
+                  name:
+                    type: string
+                  uid:
+                    type: string
+                type: object
               matcher:
                 additionalProperties:
                   type: string

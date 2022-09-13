@@ -1,0 +1,4 @@
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: lockred

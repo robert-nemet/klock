@@ -4,3 +4,4 @@ testDirs:
 - ./tests/e2e/
 - ./tests/multiple-locks/
 - ./tests/deadlock/
+- ./tests/exclusive/
