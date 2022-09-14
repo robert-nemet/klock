@@ -162,15 +162,21 @@ Load image into local cluster: `kind load docker-image IMG=<some-registry>/klock
 
 ### Install
 
-For development:
+#### For development
 
 * Kustomize: `make deploy IMG=IMG=<some-registry>/klock:tag`
-* Helm: `helm install klock klock` from `helm` folder.
-
+  
 To your cluster:
 
 ```sh
 kubectl apply -f install/klock-0.0.1.yaml
+```
+
+#### Helm
+
+```sh
+$ helm repo add rnemet https://rnemet.dev/helm-charts
+$ helm install klock rnemet/klock
 ```
 
 ### Run tests
