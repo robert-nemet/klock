@@ -1,0 +1,4 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - command: kubectl run -n $NAMESPACE kctltwo --image roffe/kubectl --overrides='{"apiVersion":"v1","spec":{"serviceAccount":"johny"}}' --restart Never -- /bin/sh -c "kubectl -n $NAMESPACE delete pods hello-world" 

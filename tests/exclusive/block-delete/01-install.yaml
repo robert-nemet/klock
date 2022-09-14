@@ -1,0 +1,15 @@
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: lockred
+spec:
+  operations:
+    - UPDATE
+    - DELETE
+  matcher:
+    aura: red
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: johny

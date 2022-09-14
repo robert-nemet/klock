@@ -26,5 +26,5 @@ webhooks:
     - pods
     - deployments
     - secrets
-    - configmaps
+    - locks
   sideEffects: None

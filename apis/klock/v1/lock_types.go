@@ -30,6 +30,7 @@ type LockSpec struct {
 
 	Matcher    map[string]string `json:"matcher,omitempty"`
 	Operations []string          `json:"operations,omitempty"`
+	Exclusive  Exclusive         `json:"exclusive,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -49,6 +50,12 @@ type LockList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Lock `json:"items"`
+}
+
+// Exclusive defines for whom Lock is ignored
+type Exclusive struct {
+	Name string `json:"name,omitempty"`
+	UID  string `json:"uid,omitempty"`
 }
 
 func init() {

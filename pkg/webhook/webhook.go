@@ -20,9 +20,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	klockv1 "klock/apis/klock/v1"
 
+	v1 "k8s.io/api/authentication/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -47,8 +49,6 @@ func NewValidator(c client.Client) admission.Handler {
 // podValidator admits a pod if a specific annotation exists.
 func (v *validator) Handle(ctx context.Context, req admission.Request) admission.Response {
 
-	log.Info("enter webhook")
-
 	var target unstructured.Unstructured
 
 	err := json.Unmarshal(req.OldObject.Raw, &target)
@@ -64,15 +64,18 @@ func (v *validator) Handle(ctx context.Context, req admission.Request) admission
 	labels := target.GetLabels()
 
 	lockList, err := v.getLocks(ctx, req)
-
 	if err != nil {
 		log.Error(err, "error while getting LockList")
-		return admission.Allowed("")
+		return admission.Allowed("allowed. can not get locks")
 	}
+
+	requester := req.UserInfo
 
 	for _, lock := range lockList.Items {
 		if v.matchOperation(string(req.Operation), lock.Spec.Operations) {
-
+			if exclude(lock.Spec.Exclusive, requester) {
+				return admission.Allowed(fmt.Sprintf("allowed. excluded from the lock[user %v, lock %v]", requester.Username, lock))
+			}
 			for k, v := range lock.Spec.Matcher {
 				if labels[k] == v {
 					return admission.Denied(fmt.Sprintf("denied, there is a lock: %v", lock.Spec.Matcher))
@@ -104,6 +107,26 @@ func (v *validator) getLocks(ctx context.Context, request admission.Request) (lo
 		log.Error(err, "error while getting LockList")
 	}
 
-	log.Info(fmt.Sprintf("locks found %v", lockList))
 	return lockList, err
+}
+
+func exclude(exclusive klockv1.Exclusive, user v1.UserInfo) bool {
+	name := exclusive.Name
+	uid := exclusive.UID
+
+	names := strings.Split(user.Username, ":")
+
+	if name == "" && uid == "" {
+		return false
+	}
+
+	if name != "" && uid == "" {
+		return names[len(names)-1] == name
+	}
+
+	if name == "" && uid != "" {
+		return uid == user.UID
+	}
+
+	return names[len(names)-1] == name && uid == user.UID
 }

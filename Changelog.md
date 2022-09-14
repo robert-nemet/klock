@@ -8,7 +8,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Feat `exclusive`: permit operation for target requester, deny for others
+- More integration tests
+
 ### Changed
+
+- deleted folder docs
+- updated documentation in README.md
+- updated golang version to 1.19
 
 ### Fixed
 
