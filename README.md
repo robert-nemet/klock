@@ -155,7 +155,7 @@ make cert-manager
 ### Build image locally
 
 ```sh
-make make docker-build IMG=IMG=<some-registry>/klock:tag
+make docker-build IMG=IMG=<some-registry>/klock:tag
 ```
 
 Load image into local cluster: `kind load docker-image IMG=<some-registry>/klock:tag`
@@ -169,7 +169,7 @@ Load image into local cluster: `kind load docker-image IMG=<some-registry>/klock
 To your cluster:
 
 ```sh
-kubectl apply -f install/klock-0.0.1.yaml
+kubectl apply -f install/klock-1.0.0.yaml
 ```
 
 #### Helm
