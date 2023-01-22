@@ -1,13 +1,11 @@
 package pkg_webhook
 
 import (
+	klockv1 "klock/apis/klock/v1"
 	"testing"
 
-	klockv1 "klock/apis/klock/v1"
-
-	v1 "k8s.io/api/authentication/v1"
-
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/authentication/v1"
 )
 
 func Test_exclude(t *testing.T) {

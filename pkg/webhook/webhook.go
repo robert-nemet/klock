@@ -77,7 +77,7 @@ func (v *validator) Handle(ctx context.Context, req admission.Request) admission
 				return admission.Allowed(fmt.Sprintf("allowed. excluded from the lock[user %v, lock %v]", requester.Username, lock))
 			}
 			for k, v := range lock.Spec.Matcher {
-				if labels[k] == v {
+				if isMatch(v, labels[k]) {
 					return admission.Denied(fmt.Sprintf("denied, there is a lock: %v", lock.Spec.Matcher))
 				}
 			}
