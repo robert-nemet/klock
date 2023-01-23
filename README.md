@@ -34,12 +34,41 @@ spec:
     - DELETE
   matcher:
     aura: red
-    aura: blue
 ```
 
 In above example `Lock` is mandatory lock. In the Namespace `yellow` is will prevent any UPDATE/DELETE operation
 on every resource that have at least one label as defined in `matcher` section. So, if there is a Pod with label
 `aura: red` in the same namespace as the lock it can be deleted as long the lock exists.
+
+#### Mandatory locking with expressions
+
+If you need to lock multiple resources with same label name but different values you can use expressions like:
+
+```yaml
+aura: red|blue|green
+```
+
+Read this as protect from update and delete all resources if they have label named `aura` which value is `red` or
+`blue` or `green`.
+
+In case label named `aura` can have values: red, blue, green and black, above expression can be:
+
+```yaml
+aura: ^black
+```
+
+Which can be read as protect all resources with label named `aura` which value is __not__ `black`. 
+
+Other examples:
+
+```yaml
+...
+aura: ^(red|blue)
+...
+aura: black|^blue
+```
+
+See test: /tests/e2e/lock-expression
 
 ### Exclusive locking
 
