@@ -48,7 +48,7 @@ If you need to lock multiple resources with same label name but different values
 aura: red|blue|green
 ```
 
-Read this as protect from update and delete all resources if they have label named `aura` which value is `red` or
+Which means protect from update and delete all resources if they have label named `aura` which value is `red` or
 `blue` or `green`.
 
 In case label named `aura` can have values: red, blue, green and black, above expression can be:
