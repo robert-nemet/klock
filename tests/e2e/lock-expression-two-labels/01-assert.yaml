@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sun
+  labels:
+    aura: red
+    element: fire
+status:
+  phase: Running
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: lock-protect-sun

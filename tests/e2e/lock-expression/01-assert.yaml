@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: green
+  labels:
+    aura: green
+status:
+  phase: Running
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: lock-expression

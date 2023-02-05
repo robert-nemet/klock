@@ -40,10 +40,14 @@ var log = logf.Log.WithName("klock-validate-hook")
 // validator validates resources
 type validator struct {
 	Client client.Client
+	Eval   Evaluator
 }
 
 func NewValidator(c client.Client) admission.Handler {
-	return &validator{Client: c}
+	return &validator{
+		Client: c,
+		Eval:   NewEvaluator(),
+	}
 }
 
 // podValidator admits a pod if a specific annotation exists.
@@ -76,10 +80,16 @@ func (v *validator) Handle(ctx context.Context, req admission.Request) admission
 			if exclude(lock.Spec.Exclusive, requester) {
 				return admission.Allowed(fmt.Sprintf("allowed. excluded from the lock[user %v, lock %v]", requester.Username, lock))
 			}
-			for k, v := range lock.Spec.Matcher {
-				if labels[k] == v {
-					return admission.Denied(fmt.Sprintf("denied, there is a lock: %v", lock.Spec.Matcher))
+			match := true
+			for k, value := range lock.Spec.Matcher {
+				v, err := v.Eval.IsMatch(value, labels[k])
+				if err != nil {
+					return admission.Denied(fmt.Sprintf("denied, there is a error in a rule: %v", err))
 				}
+				match = match && v
+			}
+			if match {
+				return admission.Denied(fmt.Sprintf("denied, there is a lock: %v", lock.Spec.Matcher))
 			}
 		}
 	}

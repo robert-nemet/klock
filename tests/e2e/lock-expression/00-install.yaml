@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: red
+  labels:
+    aura: red
+spec:
+  containers:
+  - name: hello-world
+    image: nginx
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: green
+  labels:
+    aura: green
+spec:
+  containers:
+  - name: hello-world-two
+    image: nginx
+---
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: lock-expression
+spec:
+  operations:
+    - UPDATE
+    - DELETE
+  matcher:
+    aura: ^(red|blue)

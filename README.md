@@ -34,12 +34,66 @@ spec:
     - DELETE
   matcher:
     aura: red
-    aura: blue
 ```
 
-In above example `Lock` is mandatory lock. In the Namespace `yellow` is will prevent any UPDATE/DELETE operation
+In above example `Lock` is mandatory lock. In the namespace `yellow` is will prevent any UPDATE/DELETE operation
 on every resource that have at least one label as defined in `matcher` section. So, if there is a Pod with label
 `aura: red` in the same namespace as the lock it can be deleted as long the lock exists.
+
+#### Mandatory locking with expressions
+
+If you need to lock multiple resources with same label name but different values you can use expressions like:
+
+```yaml
+aura: red|blue|green
+```
+
+Which means protect from update and delete all resources if they have label named `aura` which value is `red` or
+`blue` or `green`.
+
+In case label named `aura` can have values: red, blue, green and black, above expression can be:
+
+```yaml
+aura: ^black
+```
+
+Which can be read as protect all resources with label named `aura` which value is __not__ `black`. 
+
+Other examples:
+
+```yaml
+...
+aura: ^(red|blue)
+...
+aura: black|^blue
+```
+
+Supported operations are &(AND) , |(OR) and ^(NOT).
+
+See test: /tests/e2e/lock-expression
+
+#### Mandatory locking matching multiple labels
+
+Locks like this:
+
+```yaml
+apiVersion: klock.rnemet.dev/v1
+kind: Lock
+metadata:
+  name: lock-protect-sun
+spec:
+  operations:
+    - UPDATE
+    - DELETE
+  matcher:
+    aura: red
+    element: ^wind
+```
+
+Before version v3.0.0 would lock any resource that have label `aura: red`. In version v3.0.0 for resource to be locked it has to match all expressions under matcher.
+Looking in above example a Pod with labels `aura: red` and `element: earth` will be locked, while a Pod with labels `aura: red` and `element: wind` will not be lock.
+
+See test: /tests/e2e/lock-expressions-two-labels
 
 ### Exclusive locking
 

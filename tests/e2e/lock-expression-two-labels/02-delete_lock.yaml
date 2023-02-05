@@ -1,0 +1,6 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+delete:
+- apiVersion: klock.rnemet.dev/v1
+  kind: Lock
+  name: lock-protect-sun

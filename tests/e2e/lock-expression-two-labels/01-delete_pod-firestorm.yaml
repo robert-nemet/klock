@@ -1,0 +1,8 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+delete:
+- apiVersion: v1
+  kind: Pod
+  name: firestorm
+commands:
+- script:  ./try-delete-sun.sh
