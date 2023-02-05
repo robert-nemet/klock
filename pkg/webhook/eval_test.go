@@ -3,9 +3,12 @@ package pkg_webhook
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_isMatch(t *testing.T) {
+	evaluator := NewEvaluator()
 	type args struct {
 		rule  string
 		value string
@@ -14,6 +17,7 @@ func Test_isMatch(t *testing.T) {
 		name string
 		args args
 		want bool
+		err  bool
 	}{
 		{
 			name: "Simple match",
@@ -55,12 +59,23 @@ func Test_isMatch(t *testing.T) {
 			},
 			want: true,
 		},
+		{
+			name: "red|green&^|^|^blue error",
+			args: args{
+				rule:  "red|green&^|^|^blue",
+				value: "green",
+			},
+			want: false,
+			err:  true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isMatch(tt.args.rule, tt.args.value); got != tt.want {
-				t.Errorf("isMatch() = %v, want %v", got, tt.want)
+			got, err := evaluator.IsMatch(tt.args.rule, tt.args.value)
+			if tt.err {
+				assert.Error(t, err)
 			}
+			assert.Equal(t, got, tt.want)
 		})
 	}
 }
@@ -148,7 +163,7 @@ func Test_prepare(t *testing.T) {
 				input: []string{"^", "blue"},
 				value: "red",
 			},
-			want: []string{"!", "false"},
+			want: []string{"^", "false"},
 		},
 		{
 			name: "simple or",
@@ -156,7 +171,7 @@ func Test_prepare(t *testing.T) {
 				input: []string{"blue", "|", "red"},
 				value: "blue",
 			},
-			want: []string{"true", "||", "false"},
+			want: []string{"true", "|", "false"},
 		},
 		{
 			name: "simple and",
@@ -164,7 +179,7 @@ func Test_prepare(t *testing.T) {
 				input: []string{"blue", "&", "red"},
 				value: "blue",
 			},
-			want: []string{"true", "&&", "false"},
+			want: []string{"true", "&", "false"},
 		},
 		{
 			name: "brakets: (a|b)&c",
@@ -172,7 +187,7 @@ func Test_prepare(t *testing.T) {
 				input: []string{"(", "blue", "|", "red", ")", "&", "green"},
 				value: "blue",
 			},
-			want: []string{"(", "true", "||", "false", ")", "&&", "false"},
+			want: []string{"(", "true", "|", "false", ")", "&", "false"},
 		},
 		{
 			name: "brakets: (a|b)&^c",
@@ -180,7 +195,7 @@ func Test_prepare(t *testing.T) {
 				input: []string{"(", "blue", "|", "red", ")", "&", "^", "green"},
 				value: "blue",
 			},
-			want: []string{"(", "true", "||", "false", ")", "&&", "!", "false"},
+			want: []string{"(", "true", "|", "false", ")", "&", "^", "false"},
 		},
 	}
 	for _, tt := range tests {

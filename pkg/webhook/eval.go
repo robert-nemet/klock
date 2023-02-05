@@ -1,43 +1,87 @@
 package pkg_webhook
 
 import (
+	"errors"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/antonmedv/expr"
+	alg "github.com/robert-nemet/blobs/algorithms"
+	"github.com/robert-nemet/blobs/datas"
 )
 
-func isMatch(rule, value string) bool {
-	// simple
-	if rule == value {
-		return true
+type Evaluator interface {
+	IsMatch(rule, value string) (bool, error)
+}
+
+type evaluator struct {
+	sy   alg.ShuntingYard
+	eval alg.Evaluator[bool]
+}
+
+// IsMatch implements Evaluator
+func (e evaluator) IsMatch(rule string, value string) (bool, error) {
+	// transform to array
+	infix := prepack(rule)
+	infixs := strings.Join(prepare(infix, value), " ")
+
+	po := e.sy.Transform(infixs)
+
+	return e.eval.Evaluate(po)
+
+}
+
+func NewEvaluator() Evaluator {
+
+	ops := map[string]alg.Operation[bool]{
+		"&": func(stack datas.Stack[bool]) (bool, error) {
+			fop := stack.Pop()
+			if fop == nil {
+				return false, errors.New("no operand")
+			}
+			sop := stack.Pop()
+			if sop == nil {
+				return false, errors.New("no operand")
+			}
+			return *fop && *sop, nil
+		},
+		"|": func(stack datas.Stack[bool]) (bool, error) {
+			fop := stack.Pop()
+			if fop == nil {
+				return false, errors.New("no operand")
+			}
+			sop := stack.Pop()
+			if sop == nil {
+				return false, errors.New("no operand")
+			}
+			return *fop || *sop, nil
+		},
+		"^": func(stack datas.Stack[bool]) (bool, error) {
+			op := stack.Pop()
+			if op == nil {
+				return false, errors.New("no operand")
+			}
+			return !*op, nil
+		},
 	}
 
-	//eval
-	input := prepack(rule)
-	prep_input := prepare(input, value)
+	sy := alg.NewShuntingYard(map[string]int{"&": 1, "|": 1, "^": 2})
 
-	result, err := expr.Eval(strings.Join(prep_input, ""), map[string]interface{}{})
-	if err != nil {
-		panic(err)
+	ev := alg.NewEvaluator(ops, func(input string) (bool, error) {
+		return strconv.ParseBool(input)
+	})
+
+	return evaluator{
+		sy:   sy,
+		eval: ev,
 	}
-	return result.(bool)
 }
 
 func prepare(input []string, value string) []string {
 	var result = make([]string, len(input))
 	for cnt, s := range input {
-		if s == "|" || s == "&" {
-			result[cnt] = s + s
-			continue
-		}
-		if s == "(" || s == ")" {
+		if isReserved(s) {
 			result[cnt] = s
-			continue
-		}
-		if s == "^" {
-			result[cnt] = "!"
 			continue
 		}
 		result[cnt] = strconv.FormatBool(s == value)
@@ -46,8 +90,13 @@ func prepare(input []string, value string) []string {
 	return result
 }
 
+func isReserved(s string) bool {
+	return s == "&" || s == "^" || s == "|" || s == "(" || s == ")"
+}
+
 // prepack rule string into array
 func prepack(s string) []string {
+
 	zp := regexp.MustCompile("[(|&^)]").FindAllStringIndex(s, -1)
 
 	// flat

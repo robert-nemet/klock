@@ -3,6 +3,6 @@ kind: TestStep
 delete:
 - apiVersion: v1
   kind: Pod
-  name: red
+  name: firestorm
 commands:
-- script:  ./try-delete-green.sh
+- script:  ./try-delete-sun.sh
