@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/robert-nemet/blobs/algorithms v0.0.0-20230205135014-a3b3633747ae
 	github.com/robert-nemet/blobs/datas v0.0.0-20230204111514-391efc8e1251
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	k8s.io/api v0.26.1
 	k8s.io/apimachinery v0.26.3
 	k8s.io/client-go v0.26.1
