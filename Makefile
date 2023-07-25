@@ -141,7 +141,7 @@ $(ENVTEST): $(LOCALBIN)
 
 .PHONY: cert-manager
 cert-manager: ## Deploy cert-manager in local cluster
-	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.yaml
+	kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.0/cert-manager.yaml
 
 .PHONY: make-cluster
 make-cluster: ## Create kind cluster
