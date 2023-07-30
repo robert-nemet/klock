@@ -3,15 +3,9 @@
 version: '3'
 
 vars:
-  KUSTOMIZE: bin/kustomize
   KIND_VERSION: "v0.20.0 go1.20.5"
   CERT_MANAGER_VERSION: v1.12.0
   IMG: controller:latest
-  ENVTEST_K8S_VERSION: 1.23
-  SHELL: /usr/bin/env bash -o pipefail
-  SHELLFLAGS: -ec
-  GOBIN:
-    sh: if test ""=$(go env GOBIN); then echo "$(go env GOPATH)/bin"; else echo "$(go env GOBIN)"; fi
 
 tasks:
   init-cluster:
@@ -58,6 +52,7 @@ tasks:
       - docker-build
     cmds:
       - task: kind-load
+        silent: true
       - cd config/manager && kustomize edit set image controller={{.IMG}}
       - kustomize build config/default | kubectl apply -f -
       - echo "Waiting for controller to be ready" && sleep 25
