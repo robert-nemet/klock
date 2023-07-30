@@ -1,0 +1,13 @@
+# https://taskfile.dev
+
+version: '3'
+
+includes:
+  tools: tasks/Taskfile.tools.yml
+  tests: tasks/Taskfile.testing.yml
+
+tasks:
+  default:
+    cmds:
+      - echo "Welcome to Klock!"
+      - task -l

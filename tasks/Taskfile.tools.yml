@@ -1,0 +1,54 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  KUSTOMIZE_VERSION: 3.8.1
+  CONTROLLER_TOOLS_VERSION: v0.8.0
+  KUSTOMIZE_INSTALL_SCRIPT: "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
+  LOCALBIN:
+    sh: echo "$(pwd)/bin"
+#   CONTROLLER_GEN: {{.LOCALBIN}}/controller-gen
+#   ENVTEST: {{.LOCALBIN}}/setup-envtest
+
+tasks:
+  create-localbin:
+    desc: Create the localbin directory
+    cmds:
+      - mkdir -p {{.LOCALBIN}}
+    status:
+      - test -d {{.LOCALBIN}}
+  
+  delete-kustomize:
+    desc: Delete kustomize
+    precondition:
+      - test -f {{.LOCALBIN}}/kustomize
+    cmds:
+      - rm -rf {{.LOCALBIN}}/kustomize
+    status:
+      - test ! -f {{.LOCALBIN}}/kustomize
+
+  install-kustomize:
+    desc: Install kustomize
+    deps:
+      - create-localbin
+      - delete-kustomize
+    cmds:
+      - curl -s {{.KUSTOMIZE_INSTALL_SCRIPT}} | bash -s -- {{.KUSTOMIZE_VERSION}} {{.LOCALBIN}}
+    status:
+      - sh -c  '{{.LOCALBIN}}/kustomize version | grep v{{.KUSTOMIZE_VERSION}}'
+
+  controller-gen:
+    desc: Download controller-gen locally if necessary.
+    deps:
+      - create-localbin
+    cmds:
+      - GOBIN={{.LOCALBIN}} go install sigs.k8s.io/controller-tools/cmd/controller-gen@{{.CONTROLLER_TOOLS_VERSION}}
+
+  envtest:
+    desc: Download envtest-setup locally if necessary.
+    deps:
+      - create-localbin
+    cmds:
+      - sh -c 'GOBIN={{.LOCALBIN}} go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest'
+  
