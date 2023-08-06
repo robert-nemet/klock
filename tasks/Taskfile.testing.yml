@@ -7,6 +7,9 @@ vars:
   CERT_MANAGER_VERSION: v1.12.0
   IMG: controller:latest
 
+includes:
+  tools: ./Taskfile.tools.yml
+
 tasks:
   init-cluster:
     desc: Create a kind cluster named klock
@@ -35,6 +38,8 @@ tasks:
 
   manifests:
     desc: Generate manifests e.g. CRD, RBAC etc.
+    deps:
+      - task: tools:controller-gen
     cmds:
       - controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
     sources:
@@ -52,7 +57,6 @@ tasks:
       - docker-build
     cmds:
       - task: kind-load
-        silent: true
       - cd config/manager && kustomize edit set image controller={{.IMG}}
       - kustomize build config/default | kubectl apply -f -
       - echo "Waiting for controller to be ready" && sleep 25
@@ -68,26 +72,15 @@ tasks:
   
   undeploy:
     desc: Undeploy the controller from the kind cluster
+    preconditions:
+      - task: kustomize
     cmds:
       - kustomize build config/default | kubectl delete --ignore-not-found=true -f -
 
-  publish:
-    desc: Run tests and publish the docker image. Specify image name with IMG and version with VERSION
-    cmds:
-      - docker push {{.IMG}}
-
-  # Build the controller binary
   docker-build:
     desc: Build the docker image, specify image name with IMG
     cmds:
       - docker build -t {{.IMG}} .
-
-  docker-push:
-    desc: Push the docker image, specify image name with IMG
-    preconditions:
-      - docker images -q {{.IMG}} | wc -l | grep -q 1
-    cmds:
-      - docker push {{.IMG}}
   
   kind-load:
     desc: Load the docker image into the kind cluster, specify image name with IMG
@@ -95,3 +88,12 @@ tasks:
       - docker-build
     cmds:
       - kind -n klock load docker-image {{.IMG}}
+
+  deploy-dry-run:
+    desc: Deploy controller to the K8s cluster specified in ~/.kube/config. Use IMG to specify image name
+    deps:
+      - manifests
+      - task: tools:kustomize
+    cmds:
+      - cd config/manager && kustomize edit set image controller={{.IMG}}
+      - kustomize build config/default -o klock-dry-run.yaml

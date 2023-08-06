@@ -12,43 +12,63 @@ vars:
 #   ENVTEST: {{.LOCALBIN}}/setup-envtest
 
 tasks:
-  create-localbin:
+  mk_localbin:
     desc: Create the localbin directory
+    internal: true
+    silent: true
     cmds:
       - mkdir -p {{.LOCALBIN}}
     status:
       - test -d {{.LOCALBIN}}
   
-  delete-kustomize:
+  del_kustomize:
     desc: Delete kustomize
-    precondition:
-      - test -f {{.LOCALBIN}}/kustomize
+    internal: true
+    silent: true
     cmds:
       - rm -rf {{.LOCALBIN}}/kustomize
     status:
       - test ! -f {{.LOCALBIN}}/kustomize
 
-  install-kustomize:
-    desc: Install kustomize
+  kustomize:
+    desc: Install kustomize. Use the KUSTOMIZE_VERSION variable to specify the version.
+    silent: true
+    internal: true
     deps:
-      - create-localbin
-      - delete-kustomize
+      - mk_localbin
     cmds:
+      - task: del_kustomize
       - curl -s {{.KUSTOMIZE_INSTALL_SCRIPT}} | bash -s -- {{.KUSTOMIZE_VERSION}} {{.LOCALBIN}}
     status:
       - sh -c  '{{.LOCALBIN}}/kustomize version | grep v{{.KUSTOMIZE_VERSION}}'
 
   controller-gen:
     desc: Download controller-gen locally if necessary.
+    silent: true
+    internal: true
+    preconditions:
+      - sh: test -f {{.LOCALBIN}}/controller-gen
+      - sh: controller-gen --version | grep "{{.CONTROLLER_TOOLS_VERSION}}"
+        msg: "controller-gen version does not match {{.CONTROLLER_TOOLS_VERSION}}. Please install right version of go"
     deps:
-      - create-localbin
+      - mk_localbin
     cmds:
       - GOBIN={{.LOCALBIN}} go install sigs.k8s.io/controller-tools/cmd/controller-gen@{{.CONTROLLER_TOOLS_VERSION}}
 
   envtest:
+    silent: true
+    internal: true
     desc: Download envtest-setup locally if necessary.
     deps:
-      - create-localbin
+      - mk_localbin
     cmds:
       - sh -c 'GOBIN={{.LOCALBIN}} go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest'
   
+  install_all:
+    silent: true
+    internal: true
+    desc: Install all tools
+    deps:
+      - kustomize
+      - controller-gen
+      - envtest

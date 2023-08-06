@@ -3,11 +3,23 @@
 version: '3'
 
 includes:
-  tools: tasks/Taskfile.tools.yml
   tests: tasks/Taskfile.testing.yml
 
 tasks:
   default:
+    silent: true
     cmds:
       - echo "Welcome to Klock!"
       - task -l
+
+  publish:
+    desc: Publish build image. Specify image name with IMG
+    cmds:
+      - docker push {{.IMG}}
+
+  docker-push:
+    desc: Push the docker image, specify image name with IMG
+    preconditions:
+      - docker images -q {{.IMG}} | wc -l | grep -q 1
+    cmds:
+      - publish
