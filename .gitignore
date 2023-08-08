@@ -26,3 +26,4 @@ testbin/*
 .vscode/
 kubeconfig
 tmp/
+.task/

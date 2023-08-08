@@ -1,0 +1,99 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  KIND_VERSION: "v0.20.0 go1.20.5"
+  CERT_MANAGER_VERSION: v1.12.0
+  IMG: controller:latest
+
+includes:
+  tools: ./Taskfile.tools.yml
+
+tasks:
+  init-cluster:
+    desc: Create a kind cluster named klock
+    preconditions:
+      - sh: kind version | grep "{{.KIND_VERSION}}"
+        msg: "kind version does not match {{.KIND_VERSION}}. Please install right version of kind"
+    cmds:
+      - kind create cluster --name klock
+    status:
+      - kind get clusters | grep klock
+
+  install-cert-manager:
+    desc: Install cert-manager    
+    deps:
+      - init-cluster
+    cmds:
+      - kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/{{.CERT_MANAGER_VERSION}}/cert-manager.yaml
+      - echo "Waiting for cert-manager to be ready" && sleep 25
+    status:
+      - kubectl -n cert-manager get pods | grep Running | wc -l | grep -q 3
+
+  cleanup:
+    desc: Delete the kind cluster named klock
+    cmds:
+      - kind delete cluster -n klock
+
+  manifests:
+    desc: Generate manifests e.g. CRD, RBAC etc.
+    deps:
+      - task: tools:controller-gen
+    cmds:
+      - controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+    sources:
+      - main.go
+      - apis/**/*.go
+      - pkg/**/*.go
+    generates:
+      - config/crd/bases/**/*.yaml
+
+  deploy:
+    desc: Deploy the controller to the kind cluster and wait for it to be ready. Use IMG to specify image name
+    deps:
+      - install-cert-manager
+      - manifests
+      - docker-build
+    cmds:
+      - task: kind-load
+      - cd config/manager && kustomize edit set image controller={{.IMG}}
+      - kustomize build config/default | kubectl apply -f -
+      - echo "Waiting for controller to be ready" && sleep 25
+    status:
+      - kubectl get pods -n klock-system | grep klock-controller | wc -l | grep -q 1
+
+  ktest:
+    desc: Run kuttl tests. Specify image name with IMG
+    cmds:
+      - task: deploy
+        silent: true
+      - kubectl kuttl test
+  
+  undeploy:
+    desc: Undeploy the controller from the kind cluster
+    preconditions:
+      - task: kustomize
+    cmds:
+      - kustomize build config/default | kubectl delete --ignore-not-found=true -f -
+
+  docker-build:
+    desc: Build the docker image, specify image name with IMG
+    cmds:
+      - docker build -t {{.IMG}} .
+  
+  kind-load:
+    desc: Load the docker image into the kind cluster, specify image name with IMG
+    deps:
+      - docker-build
+    cmds:
+      - kind -n klock load docker-image {{.IMG}}
+
+  deploy-dry-run:
+    desc: Deploy controller to the K8s cluster specified in ~/.kube/config. Use IMG to specify image name
+    deps:
+      - manifests
+      - task: tools:kustomize
+    cmds:
+      - cd config/manager && kustomize edit set image controller={{.IMG}}
+      - kustomize build config/default -o klock-dry-run.yaml
