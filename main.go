@@ -81,12 +81,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// pv := klockcorev1.NewValidator(mgr.GetClient())
-	// mgr.GetWebhookServer().Register("/validate-pod", &webhook.Admission{Handler: pv})
-
-	// pv = klockapps1.NewValidator(mgr.GetClient())
-	// mgr.GetWebhookServer().Register("/validate-deployment", &webhook.Admission{Handler: pv})
-
 	pv := wh.NewValidator(mgr.GetClient())
 	mgr.GetWebhookServer().Register("/validate-all", &webhook.Admission{Handler: pv})
 	//+kubebuilder:scaffold:builder

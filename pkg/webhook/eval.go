@@ -24,15 +24,11 @@ func (e evaluator) IsMatch(rule string, value string) (bool, error) {
 	// transform to array
 	infix := prepack(rule)
 	infixs := strings.Join(prepare(infix, value), " ")
-
 	po := e.sy.Transform(infixs)
-
 	return e.eval.Evaluate(po)
-
 }
 
 func NewEvaluator() Evaluator {
-
 	ops := map[string]alg.Operation[bool]{
 		"&": func(stack datas.Stack[bool]) (bool, error) {
 			fop := stack.Pop()
@@ -64,13 +60,10 @@ func NewEvaluator() Evaluator {
 			return !*op, nil
 		},
 	}
-
 	sy := alg.NewShuntingYard(map[string]int{"&": 1, "|": 1, "^": 2})
-
 	ev := alg.NewEvaluator(ops, func(input string) (bool, error) {
 		return strconv.ParseBool(input)
 	})
-
 	return evaluator{
 		sy:   sy,
 		eval: ev,
@@ -86,7 +79,6 @@ func prepare(input []string, value string) []string {
 		}
 		result[cnt] = strconv.FormatBool(s == value)
 	}
-
 	return result
 }
 
