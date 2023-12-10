@@ -12,7 +12,7 @@
 pr_agent:summary
 
 ## PR Walktrough
-pr_agent:walktrough
+pr_agent:walkthrough
 
 
 
