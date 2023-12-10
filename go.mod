@@ -1,6 +1,6 @@
 module klock
 
-go 1.20
+go 1.21.4
 
 require (
 	github.com/robert-nemet/blobs/algorithms v0.0.0-20230205135014-a3b3633747ae
