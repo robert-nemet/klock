@@ -126,8 +126,13 @@ func exclude(exclusive klockv1.Exclusive, user v1.UserInfo) bool {
 
 	names := strings.Split(user.Username, ":")
 
-	if name == "" && uid == "" {
-		return false
+	if name == "" {
+		if uid == "" {
+			return false
+		}
+		if uid != "" {
+			return uid == user.UID
+		}
 	}
 
 	if name != "" && uid == "" {
