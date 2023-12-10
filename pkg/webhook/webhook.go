@@ -80,7 +80,7 @@ func (v *validator) Handle(ctx context.Context, req admission.Request) admission
 			if exclude(lock.Spec.Exclusive, requester) {
 				return admission.Allowed(fmt.Sprintf("allowed. excluded from the lock[user %v, lock %v]", requester.Username, lock))
 			}
-			match := true
+			var match = true
 			for k, value := range lock.Spec.Matcher {
 				v, err := v.Eval.IsMatch(value, labels[k])
 				if err != nil {
@@ -137,10 +137,6 @@ func exclude(exclusive klockv1.Exclusive, user v1.UserInfo) bool {
 
 	if name != "" && uid == "" {
 		return names[len(names)-1] == name
-	}
-
-	if name == "" && uid != "" {
-		return uid == user.UID
 	}
 
 	return names[len(names)-1] == name && uid == user.UID
