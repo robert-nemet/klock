@@ -1,7 +1,7 @@
 name: PRAgent
 on:
   pull_request:
-    branches: [$default-branch]
+    branches: ["*"]
   issue_comment:
     types: [created]
 
