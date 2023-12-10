@@ -25,3 +25,4 @@ jobs:
           github_action.auto_review: "true"
           github_action.auto_describe: "true"
           github_action.auto_improve: "true"
+          pr_update_changelog.push_changelog_changes: "true"
