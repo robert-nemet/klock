@@ -20,3 +20,8 @@ jobs:
         env:
           OPENAI_KEY: ${{ secrets.OPENAI }}
           GITHUB_TOKEN: ${{ secrets.API_TOKEN }}
+          pr_description.use_description_markers: "true"
+          pr_description.include_generated_by_header: "true"
+          github_action.auto_review: "true"
+          github_action.auto_describe: "true"
+          github_action.auto_improve: "true"
