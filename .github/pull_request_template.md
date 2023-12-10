@@ -9,11 +9,9 @@
 - [ ] I have made corresponding changes to the documentation
 
 ## PR Description
+
 pr_agent:summary
 
-## PR Walktrough
+## PR Walkthrough
+
 pr_agent:walkthrough
-
-
-
-
